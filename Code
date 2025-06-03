@@ -1,0 +1,902 @@
+CREATE DATABASE IF NOT EXISTS hospital_db;
+
+USE hospital_db;
+
+CREATE TABLE IF NOT EXISTS doctors (
+
+Id INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(100) NOT NULL,
+
+Specialization VARCHAR(100), Phone VARCHAR(20),
+
+Email VARCHAR(100)
+
+);
+
+CREATE TABLE IF NOT EXISTS patients (
+
+Id INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(100) NOT NULL,
+
+Age INT,
+
+Gender VARCHAR(10), Phone VARCHAR(20), Email VARCHAR(100)
+
+);
+
+CREATE TABLE IF NOT EXISTS appointments ( Id INT AUTO_INCREMENT PRIMARY KEY,
+
+Patient_name VARCHAR(100) NOT NULL, Doctor_name VARCHAR(100) NOT NULL, Date DATE NOT NULL,
+
+Time TIME NOT NULL, Reason VARCHAR(255)
+
+);
+
+
+
+2.	Python:
+
+from flask import Flask, render_template, request, redirect import mysql.connector
+
+app = Flask(  name  )
+
+
+
+# Connect to MySQL
+
+db = mysql.connector.connect( host="localhost", user="your_mysql_username", password="your_mysql_password", database="hospital_db"
+
+)
+
+                                                 12
+
+cursor = db.cursor(dictionary=True)     
+
+#HomePage 
+
+                  @app.route('/')    
+
+
+
+                                                                                        
+
+                                                     def index():
+
+return render_template("index.html")
+
+
+
+# Doctors Page @app.route('/doctors') def doctors():
+
+cursor.execute("SELECT * FROM doctors") doctors = cursor.fetchall()
+
+return render_template("doctors.html", doctors=doctors)
+
+@app.route('/add_doctor', methods=['POST']) def add_doctor():
+
+name = request.form['name']
+
+specialization = request.form['specialization'] phone = request.form['phone']
+
+email = request.form['email']
+
+cursor.execute("INSERT INTO doctors (name, specialization, phone, email) VALUES (%s, %s, %s, %s)", (name, specialization, phone, email))
+
+db.commit()
+
+return redirect('/doctors')
+
+
+
+# Patients Page @app.route('/patients') def patients():
+
+cursor.execute("SELECT * FROM patients") patients = cursor.fetchall()
+
+return render_template("patients.html", patients=patients)
+
+
+
+@app.route('/add_patient', methods=['POST']) def add_patient():
+
+name = request.form['name'] age = request.form['age'] gender = request.form['gender'] phone = request.form['phone'] email = request.form['email']
+
+cursor.execute("INSERT INTO patients (name, age, gender, phone, email) VALUES (%s, %s, %s, %s,
+
+%s)",
+
+(name, age, gender, phone, email)) db.commit()
+
+return redirect('/patients')
+
+                                                           # Appointments Page @app.route('/appointments') 
+
+                                           
+
+
+
+def appointments():
+
+
+
+cursor.execute("SELECT * FROM appointments") appointments = cursor.fetchall()
+
+return render_template("appointments.html", appointments=appointments)
+
+
+
+@app.route('/add_appointment', methods=['POST']) def add_appointment():
+
+patient_name = request.form['patient_name'] doctor_name = request.form['doctor_name'] date = request.form['date']
+
+time = request.form['time']
+
+ reason = request.form['reason']
+
+cursor.execute("INSERT INTO appointments (patient_name, doctor_name, date, time, reason) VALUES (%s, %s, %s, %s, %s)",
+
+(patient_name, doctor_name, date, time, reason)) db.commit()
+
+return redirect('/appointments')
+
+if   name	== '  main  ':
+
+app.run(debug=True)
+
+                                                                               
+
+
+
+                                                                              
+
+    3.Html:
+
+
+
+<!DOCTYPE html>
+
+<html lang=”en”>
+
+<head>
+
+<meta charset=”UTF-8”>
+
+<title>Hospital Management System</title>
+
+<link rel=”stylesheet” href=”{{ url_for(‘static’, filename=’style.css’) }}”>
+
+</head>
+
+<body class=”bg”>
+
+<div class=”container”>
+
+<h1>Welcome to Hospital Management System</h1>
+
+<div class=”nav-links”>
+
+<a href=”/doctors”>Doctors</a>
+
+<a href=”/patients”>Patients</a>
+
+<a href=”/appointments”>Appointments</a>
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+                                                                     14
+
+4.Html:
+
+<!DOCTYPE html>
+
+<html lang=”en”>
+
+<head>
+
+<meta charset=”UTF-8”>
+
+<title>Doctors – Hospital Management</title>
+
+<link rel=”stylesheet” href=”{{ url_for(‘static’, filename=’style.css’) }}”>
+
+</head>
+
+<body class=”bg”>
+
+<div class=”container”>
+
+<h1>Doctors</h1>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Specialization</th>
+
+<th>Phone</th>
+
+<th>Email</th>
+
+</tr>
+
+{% for doc in doctors %}
+
+<tr>
+
+
+
+
+
+                                   
+
+               <td>{{ doc.id }}</td>
+
+<td>{{ doc.name }}</td>
+
+<td>{{ doc.specialization }}</td>
+
+<td>{{ doc.phone }}</td>
+
+<td>{{ doc.email }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+
+<h2>Add Doctor</h2>
+
+<form method=”POST” action=”/add_doctor”>
+
+<input type=”text” name=”name” placeholder=”Name” required>
+
+<input type=”text” name=”specialization” placeholder=”Specialization”>
+
+<input type=”text” name=”phone” placeholder=”Phone”>
+
+<input type=”email” name=”email” placeholder=”Email”>
+
+<button type=”submit”>Add</button>
+
+</form>
+
+<a href=”/” class=”back-link”>Back to Home</a>
+
+</div>
+
+</body>
+
+</html>
+
+
+
+5.Html:
+
+
+
+<!DOCTYPE html>
+
+<html lang=”en”>
+
+<head>
+
+<meta charset=”UTF-8”>
+
+<title>Patients – Hospital Management</title>
+
+<link rel=”stylesheet” href=”{{ url_for(‘static’, filename=’style.css’) }}”>
+
+</head>
+
+<body class=”bg”>
+
+<div class=”container”>
+
+<h1>Patients</h1>
+
+<table>
+
+<tr>
+
+  <th>ID</th>                                                   
+
+<th>Name</th>
+
+<th>Age</th>
+
+<th>Gender</th>
+
+                 <th>Phone</th>
+
+<th>Email</th>
+
+  {% for pat in patients %}
+
+<tr>
+
+<td>{{ pat.id }}</td>
+
+<td>{{ pat.name }}</td>
+
+<td>{{ pat.age }}</td>
+
+<td>{{ pat.gender }}</td>
+
+<td>{{ pat.phone }}</td>
+
+<td>{{ pat.email }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+
+<h2>Add Patient</h2>
+
+<form method=”POST” action=”/add_patient”>
+
+<input type=”text” name=”name” placeholder=”Name” required>
+
+<input type=”number” name=”age” placeholder=”Age”>
+
+<input type=”text” name=”gender” placeholder=”Gender”>
+
+<input type=”text” name=”phone” placeholder=”Phone”>
+
+<input type=”email” name=”email” placeholder=”Email”>
+
+
+
+
+
+                                                                            16
+
+<button type=”submit”>Add</button>
+
+</form>                                                             
+
+<a href=”/” class=”back-link”>Back to Home</a>
+
+</div>
+
+</body>
+
+</html>                                                                                                                                                                                                                                             
+
+
+
+
+
+
+
+
+
+        6.Add_customer:
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Add Customer</title>
+
+<style> body { margin: 0;
+
+font-family: Arial, sans-serif; background-image:
+
+url('images/customer_background.jpg'); /* your image path
+
+*/
+
+background-size: cover; background-position: center; height: 100vh;
+
+display: flex;
+
+justify-content: center; align-items: center; color: white;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                         17
+
+.form-container {
+
+background-color: rgba(0, 0, 0, 0.7); /* dark transparent background */
+
+padding: 30px; border-radius: 10px; width: 400px;
+
+}
+
+
+
+.form-container h2 { text-align: center; margin-bottom: 20px;
+
+}
+
+.form-container input { width: 100%;padding:10px;
+
+
+
+
+
+margin: 10px 0; border-radius: 5px; border: none;
+
+}
+
+
+
+.form-container input[type="submit"] { background-color: #28a745;
+
+color: white; cursor: pointer;
+
+}
+
+
+
+.form-container input[type="submit"]:hover { background-color: #218838;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div class="form-container">
+
+<h2>Add Customer</h2>
+
+<form action="save_customer.php" method="POST">
+
+<label for="name">Customer Name:</label>
+
+<input type="text" id="name" name="name" required>
+
+
+
+<label for="phone">Phone:</label>
+
+<input type="text" id="phone" name="phone" required>
+
+
+
+<label for="address">Address:</label>
+
+<input type="text" id="address" name="address" required>
+
+
+
+
+
+<input type="submit" value="Save Customer">
+
+</form>
+
+</div>
+
+
+
+</body>
+
+
+
+</html
+
+
+
+          
+
+6.Html:
+
+
+
+<!DOCTYPE html>
+
+<html lang=”en”>
+
+<head>
+
+<meta charset=”UTF-8”>
+
+<title>Appointments – Hospital Management</title>
+
+<link rel=”stylesheet” href=”{{ url_for(‘static’, filename=’style.css’) }}”>
+
+</head>
+
+<body class=”bg”>
+
+<div class=”container”>
+
+<h1>Appointments</h1>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+
+<th>Patient</th>
+
+<th>Doctor</th>
+
+<th>Date</th>
+
+                                                                19
+
+<th>Time</th>
+
+<th>Reason</th>
+
+</tr>
+
+{% for app in appointments %}
+
+<tr>
+
+<td>{{ app.id }}</td>
+
+<td>{{ app.patient_name }}</td>
+
+<td>{{ app.doctor_name }}</td>
+
+<td>{{ app.date }}</td>
+
+<td>{{ app.time }}</td>
+
+<td>{{ app.reason }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+        <h2>Add Appointment</h2>
+
+
+
+
+
+  <form method=”POST” action=”/add_appointment”>
+
+<input type=”text” name=”patient_name” placeholder=”Patient Name” required>
+
+<input type=”text” name=”doctor_name” placeholder=”Doctor Name” required>
+
+<input type=”date” name=”date” required>
+
+<input type=”time” name=”time” required>
+
+<input type=”text” name=”reason” placeholder=”Reason”>
+
+<button type=”submit”>Add</button>
+
+</form>
+
+
+
+<a href=”/” class=”back-link”>Back to Home</a>
+
+</div>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+                                                                                   20
+
+
+
+7.Css:
+
+
+
+/* Background */
+
+.bg {
+
+Background-image: url(‘../static/hospital_bg.jpg’); Background-size: cover;
+
+Background-position: center; Background-repeat: no-repeat; Min-height: 100vh;
+
+Font-family: ‘Segoe UI’, sans-serif; Color: #fff;
+
+}
+
+
+
+/* Container Styling */
+
+.container {
+
+Background-color: rgba(0, 0, 0, 0.6); Padding: 30px;
+
+Margin: 50px auto;
+
+Border-radius: 20px;
+
+Width: 85%;
+
+Max-width: 1000px;
+
+Box-shadow: 0 0 20px #222;
+
+}
+
+                                                                          
+
+/* Headings */ H1, h2 {
+
+Text-align: center; Margin-bottom: 20px; 
+
+Color: #fdd835;
+
+
+
+
+
+/* Links */
+
+.nav-links {
+
+Text-align: center; Margin: 20px 0;
+
+}
+
+.nav-links a { Margin: 0 15px;
+
+Padding: 10px 20px; Background-color: #43a047; Color: white;
+
+Text-decoration: none; Border-radius: 10px;
+
+}
+
+
+
+
+
+
+
+
+
+                                                                                        21
+
+.nav-links a:hover { Background-color: #66bb6a;
+
+}
+
+
+
+.back-link {
+
+Display: inline-block; Margin-top: 30px; Background-color: #039be5; Padding: 10px 15px;
+
+Color: white;
+
+Text-decoration: none; Border-radius: 8px;
+
+}
+
+.back-link:hover { Background-color: #29b6f6;
+
+}
+
+
+
+/* Form Styling */ Form {
+
+Display: flex;
+
+Flex-wrap: wrap;
+
+Gap: 15px;
+
+Justify-content: center;
+
+}
+
+Form input, form button { Padding: 10px;
+
+Border-radius: 5px; Border: none;
+
+}
+
+Form input { Width: 200px;
+
+}
+
+Form button {
+
+Background-color: #e53935; Color: white;
+
+Cursor: pointer;
+
+                                                                                                                                                                                                               }
+
+Form button:hover { Background-color: #ef5350;
+
+}
+
+
+
+/* Table Styling */ Table {
+
+Width: 100%;
+
+Border-collapse: collapse; Background-color: white;
+
+                                                                                   
+
+
+
+
+
+Color: #333;                                                                            
+
+Border-radius: 10px; Overflow: hidden;
+
+}
+
+Th, td {
+
+Padding: 12px; Text-align: center;
+
+Border-bottom: 1px solid #ccc;
+
+}
+
+Th {
+
+Background-color: #3f51b5; Color: white;
+
+}
+
+Tr:hover {
+
+Background-color: #f1f1f1;
+
+}
+
+
+
+8.Python:
+
+From flask import Flask, render_template, request, redirect Import mysql.connector
+
+
+
+App = Flask(  name  )
+
+
+
+# Database connection
+
+Db = mysql.connector.connect( Host=”localhost”, User=”root”,
+
+Password=”your_password”, # change this to your MySQL password Database=”hospital_db”
+
+)                                                                      
+
+Cursor = db.cursor(dictionary=True)
+
+# Home page @app.route(“/”) Def home():
+
+Return render_template(“index.html”)
+
+
+
+# Doctors page @app.route(“/doctors”) Def doctors():
+
+
+
+Cursor.execute(“SELECT * FROM doctors”) Doctors = cursor.fetchall()
+
+Return render_template(“doctors.html”, doctors=doctors)
+
+@app.route(“/add_doctor”, methods=[“POST”]) Def add_doctor():
+
+Name = request.form[“name”]
+
+                                                                                23
+
+
+
+Specialization = request.form[“specialization”] Phone = request.form[“phone”]
+
+Email = request.form[“email”]
+
+Cursor.execute(“INSERT INTO doctors (name, specialization, phone, email) VALUES (%s, %s, %s, %s)”, (name, specialization, phone, email))
+
+Db.commit()
+
+Return redirect(“/doctors”)
+
+
+
+# Patients page @app.route(“/patients”) Def patients():
+
+Cursor.execute(“SELECT * FROM patients”) Patients = cursor.fetchall()
+
+Return render_template(“patients.html”, patients=patients)
+
+
+
+@app.route(“/add_patient”, methods=[“POST”]) Def add_patient():
+
+Name = request.form[“name”] Age = request.form[“age”] Gender = request.form[“gender”] Phone = request.form[“phone”] Email = request.form[“email”]
+
+Cursor.execute(“INSERT INTO patients (name, age, gender, phone, email) VALUES (%s, %s, %s, %s, %s)”, (name, age, gender, phone, email))
+
+Db.commit()
+
+Return redirect(“/patients”)
+
+# Appointments page @app.route(“/appointments”) Def appointments():
+
+Cursor.execute(“SELECT * FROM appointments”) Appointments = cursor.fetchall()
+
+Return render_template(“appointments.html”, appointments=appointments)
+
+@app.route(“/add_appointment”, methods=[“POST”]) Def add_appointment():
+
+Patient_name = request.form[“patient_name”] Doctor_name = request.form[“doctor_name”] Date = request.form[“date”]
+
+Time = request.form[“time”] Reason = request.form[“reason”]
+
+Cursor.execute(“INSERT INTO appointments (patient_name, doctor_name, date, time, reason) VALUES (%s,
+
+%s, %s, %s, %s)”,
+
+    (patient_name, doctor_name, date, time, reason)) Db.commit()
+
+Return redirect(“/appointments”)
+
